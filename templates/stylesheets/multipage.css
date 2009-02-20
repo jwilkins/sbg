@@ -1,0 +1,75 @@
+body {
+  background:#000;
+}
+a {
+  color:#fff;
+}
+a:visited {
+  color:#fff;
+}
+a:hover {
+  text-decoration:none;
+}
+
+.gallery{
+  height: 90%; width:90%; text-align:center; position:relative;
+  vertical-align:middle;
+}
+
+.gallery ul.section {
+  padding:0; margin:0; list-style:none; width:635px; height:auto; position:relative; z-index:10;
+}
+
+.gallery ul.section li {
+  display:block; width:50px; height:15px; float:left;
+}
+
+.gallery ul.section li a.page{
+  display:block; font-size:11px; width:49px; height:20px; text-align:center; line-height:20px; color:#000; text-decoration:none; border:1px solid #000; border-width:1px 1px 0 0; background:#ccc; font-family:verdana, arial, sans-serif;
+}
+
+.gallery ul.section li a ul, 
+.gallery ul.section li ul {
+  display:none;
+}
+
+.gallery ul.section li.active a {
+  color:#000; background:#bbb;
+}
+
+.gallery ul.section li a:hover, 
+.gallery ul.section li:hover a {
+  color:#000; background:#aaa;
+  vertical-align:middle;
+}
+
+.gallery ul.section li.active ul {
+  display:block; position:absolute; left:0; top:21px; list-style:none; padding:0; margin:0; height:475px; background:#ddd; width:464px; padding:40px 60px; border:20px solid #bbb; z-index:1;
+}
+
+.gallery ul.section li a:hover ul, 
+.gallery ul.section li:hover ul {
+  display:block; position:absolute; left:0; top:21px; list-style:none; padding:0; margin:0; height:475px; background:#ddd; width:464px; padding:40px 60px; border:20px solid #aaa; z-index:100;}
+
+.gallery ul.section li ul li {
+  display:inline; width:112px; height:142px; float:left; border:1px solid #fff; margin:1px;
+}
+
+.gallery ul.section li ul li a {
+  display:block; width:110px; height:auto; cursor:default; vertical-align:middle; text-decoration:none; background:#444; border:1px solid #888;
+}
+
+.gallery ul.section li ul li a img {
+  display:block; width:100px; height:auto; vertical-align: middle; border:5px solid #eee;
+}
+
+.gallery ul.section li a:hover ul li a:hover, 
+.gallery ul.section li:hover ul li a:hover {
+  white-space:normal; position:relative;
+}
+
+.gallery ul.section li a:hover ul li a:hover img, 
+.gallery ul.section li:hover ul li a:hover img {
+  position:absolute; left:-50px; top:-32px; width:200px; height:auto; border-color:#fff; 
+}
+

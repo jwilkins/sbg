@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <%= render :partial => "meta" %>
+    <%= render :partial => "linkrel" %>
+    <title>Blog</title>
+  </head>
+  <body>
+    <%= render :partial => "header" %>
+    <div id="wrapper">
+<!-- --------------------------------- Pagenav Start ------------------------------------- -->
+      <div class="pagenav">
+        <% if @prev_page %>
+          <a href="/updates-<%= @prev_page %>.html">Previous</a>
+        <% else %>
+          Previous
+        <% end %>
+        <% (1..@pages).each { |p| %>
+          <% if @page = p %>
+            <a class='curr_page' href="/blog-<%= p %>.html"><%= p %></a>
+          <% else %>
+            <a href="/updates-<%= p %>.html"><%= p %></a>
+          <% end %>
+        <% } %>
+        <% if @next_page %>
+          <a href="/updates-<%= @next_page %>.html">Next</a>
+        <% else %>
+          Next
+        <% end %>
+      </div>
+<!-- --------------------------------- Pagenav End ------------------------------------- -->
+      <%= render :partial => "sidebar_left" %>
+<!-- --------------------------------- Posts Start ------------------------------------- -->
+      <div class='entries'>
+        <% @content_info.keys.sort.reverse.each { |k| %>
+          <% @dir = @content_info[k][:dir] %>
+          <% @title = @content_info[k][:title] %>
+          <% @body = @content_info[k][:body] %>
+          <%= render :partial => "blogpost" %>
+        <% } %>
+      </div>
+<!-- ---------------------------------- Posts End -------------------------------------- -->
+      <%= render :partial => "sidebar_right" %>
+    </div>
+    <%= render :partial => "footer" %>
+  </body>
+</html>

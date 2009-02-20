@@ -1,0 +1,15 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <%= render :partial => "meta" %>
+    <%= render :partial => "linkrel" %>
+    <title><%= @title %></title>
+  </head>
+  <body> 
+    <%= render :partial => "header" %>
+    <div id="wrapper">
+      <%= render :partial => "blogpost" %>
+    </div>
+    <%= render :partial => "footer" %>
+  </body>
+</html>

@@ -1,0 +1,143 @@
+#!/sw/bin/env ruby
+ROOTDIR = File.expand_path(File.dirname(__FILE__))
+require 'find'
+require 'optparse'
+
+require 'rubygems'
+require 'erubis'
+require 'activesupport'
+require 'action_view'
+#require 'ruby-debug'
+
+class SBG
+  def initialize
+    @templates = "#{ROOTDIR}/templates"
+    @htdocs = "#{ROOTDIR}/htdocs"
+    @data = "#{ROOTDIR}/data"
+    @ppp = 10
+
+    ActionView::Base.process_view_paths(@templates)
+  end
+
+  def make_html(template, pagevars, dest)
+    view = ActionView::Base.new(@templates, pagevars)
+    html = view.render(:file => template)
+    open(dest, "wb+") { |f| f << html }
+  end
+
+  def generate
+    # Make sure required dirs are there
+    [@htdocs].each { |d|
+      Dir.mkdir(d) unless File.exists?(d)
+      %w(images javascripts stylesheets resources).each { |sd|
+        path = File.join(d, sd)
+        Dir.mkdir(path) unless File.exists?(path)
+
+        src = File.join(@templates, sd)
+        FileUtils.cp_r(src, @htdocs, { :remove_destination => true })
+      }
+    }
+
+    content_info = {}
+    Find.find(@data) { |f|
+      if File.file?(f) && f =~ /_([\d]{12,12}).txt$/i
+        post = {}
+
+        pf = open(f)
+        post[:date] = $1
+        post[:dir] = $1
+        post[:title] = pf.readline
+        post[:body] = pf.read
+
+        postdir = File.join(@htdocs, $1)
+        Dir.mkdir(postdir) unless File.exists?(postdir)
+        make_html("#{@templates}/blogpost.erb", post, "#{postdir}/index.html")
+
+        content_info[$1] = post
+      end
+    }
+
+    return nil unless content_info.keys.length > 0
+
+    # Pagination
+    pc = content_info.length
+    puts "[*] #{pc} posts total"
+
+    %w(blog).each { |template|
+      puts "[*] Generating pages for #{template}"
+      outdir = @htdocs
+      ppp = @ppp
+
+      pages = pc / ppp
+      pages += 1 unless pc % ppp == 0
+
+      content_keys = content_info.keys.sort.reverse
+
+      (1..pages).each { |p|
+        puts "    - page #{p} of #{pages}"
+        page_content = {}
+        if content_keys.length >= ppp
+          ppp.times {
+            key = content_keys.shift
+            page_content[key] = content_info[key]
+          }
+        else
+          content_keys.length.times {
+            key = content_keys.shift
+            page_content[key] = content_info[key]
+          }
+        end
+
+        if p+1 > pages
+          next_page = nil
+        else
+          next_page = p+1
+        end
+
+        if p-1 < 1
+          prev_page = nil
+        else
+          prev_page = p-1
+        end
+
+        pagevars = {
+          :next_page => next_page,
+          :prev_page => prev_page,
+          :pages => pages,
+          :page => p,
+          :content_info => page_content
+        }
+
+        make_html("#{@templates}/#{template}.erb", pagevars, "#{outdir}/blog-#{p}.html")
+
+        FileUtils.cp("#{outdir}/blog-1.html", "#{outdir}/index.html")
+      }
+
+      pagevars = {
+        :content_info => content_info
+      }
+
+      make_html("#{@templates}/blog.atom.builder", pagevars, "#{outdir}/blog.atom")
+      make_html("#{@templates}/blog.rss.builder", pagevars, "#{outdir}/blog.rss")
+    }
+  end
+end
+
+if __FILE__ == $0
+  puts "[*] Static Blog Generator"
+  # Process command line
+  opts = OptionParser.new do |opts|
+    opts.banner = "Usage: #$0 [options]"
+    opts.on('-f', '--force', 'Force regeneration') do
+      @force = true
+    end
+    opts.on('-o', '--outdir |STRING|', 'Directory to output to') do |string|
+      @outdir = string
+    end
+  end
+  opts.parse!(ARGV)
+
+  sbg = SBG.new
+  sbg.generate
+end
+
