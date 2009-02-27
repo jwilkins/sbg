@@ -41,19 +41,20 @@ class SBG
     content_info = {}
     Find.find(@data) { |f|
       if File.file?(f) && f =~ /_([\d]{12,12}).txt$/i
+        dirdate = $1
         post = {}
 
         pf = open(f)
-        post[:date] = $1
-        post[:dir] = $1
+        post[:date] = dirdate
+        post[:dir] = dirdate
+        postdir = File.join(@htdocs, dirdate)
         post[:title] = pf.readline
-        post[:body] = pf.read
+        post[:body] = pf.read.gsub(/\n\n/, "\n<br><br>\n")
 
-        postdir = File.join(@htdocs, $1)
         Dir.mkdir(postdir) unless File.exists?(postdir)
         make_html("#{@templates}/blogpost.erb", post, "#{postdir}/index.html")
 
-        content_info[$1] = post
+        content_info[dirdate] = post
       end
     }
 

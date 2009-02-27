@@ -1,0 +1,15 @@
+sbg
+---
+A simple static blog generator.  Text files go in the data directory.
+Create a subdirectory for tags.
+
+eg:
+ |
+ +- data
+    |
+    + games
+    + food
+      |
+      + pizza_200902021100.txt
+
+
