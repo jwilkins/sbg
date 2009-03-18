@@ -1,4 +1,4 @@
-<div id="post-<%= @dir %>" class="post">
-  <h2><a title="<%= @title %>" rel="bookmark" class="update_title" href="/<%= @dir %>/"><%= @title %></a></h2>
-   <%= @body %>
+<div id="post-<%= @post[:dir] %>" class="post">
+  <h2><a title="<%= @post[:title] %>" rel="bookmark" class="update_title" href="/<%= @post[:dir] %>/"><%= @post[:title] %></a></h2>
+   <%= @post[:body] %>
 </div>

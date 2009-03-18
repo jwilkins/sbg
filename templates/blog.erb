@@ -34,9 +34,7 @@
 <!-- ================================= Posts Start ===================================== -->
         <div class='entries'>
           <% @content_info.keys.sort.reverse.each { |k| %>
-            <% @dir = @content_info[k][:dir] %>
-            <% @title = @content_info[k][:title] %>
-            <% @body = @content_info[k][:body] %>
+            <% @post = @content_info[k] %>
             <%= render :partial => "blogpost" %>
           <% } %>
         </div>

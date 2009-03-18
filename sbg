@@ -25,20 +25,78 @@ class SBG
     open(dest, "wb+") { |f| f << html }
   end
 
-  def generate
-    # Make sure required dirs are there
-    [@htdocs].each { |d|
-      Dir.mkdir(d) unless File.exists?(d)
-      %w(images javascripts stylesheets resources).each { |sd|
-        path = File.join(d, sd)
-        Dir.mkdir(path) unless File.exists?(path)
+  def paginate(options)
+    raise "collection invalid" unless options[:collection]
+    collection = options[:collection]
+    raise "template invalid" unless options[:template]
+    template = options[:template]
+    raise "outdir invalid" unless options[:outdir]
+    outdir = options[:outdir]
+    options[:ppp] ||= 5
+    ppp = options[:ppp]
+    options[:outname] ||= 'blog'
+    outname = options[:outname]
+    options[:pagevars] ||= {}
+    pagevars = options[:pagevars]
 
-        src = File.join(@templates, sd)
-        FileUtils.cp_r(src, @htdocs, { :remove_destination => true })
-      }
+    # Pagination
+    pages = collection.length / ppp
+    pages += 1 unless collection.length % ppp == 0
+
+    content_keys = collection.keys.sort.reverse
+
+    (1..pages).each { |p|
+      puts "    - page #{p} of #{pages}"
+      page_content = {}
+      if content_keys.length >= ppp
+        ppp.times {
+          key = content_keys.shift
+          page_content[key] = collection[key]
+        }
+      else
+        content_keys.length.times {
+          key = content_keys.shift
+          page_content[key] = collection[key]
+        }
+      end
+
+      if p+1 > pages
+        next_page = nil
+      else
+        next_page = p+1
+      end
+
+      if p-1 < 1
+        prev_page = nil
+      else
+        prev_page = p-1
+      end
+
+      pagevars[:next_page] = next_page
+      pagevars[:prev_page] = prev_page
+      pagevars[:pages] = pages
+      pagevars[:page] = p
+      pagevars[:content_info] = page_content
+
+      make_html("#{@templates}/#{template}.erb", pagevars, "#{outdir}/#{outname}-#{p}.html")
+
     }
+    FileUtils.cp("#{outdir}/#{outname}-1.html", "#{outdir}/#{outname}.html")
+  end
 
-    content_info = {}
+  def copy_resources
+    FileUtils.mkdir_p(@htdocs)
+    %w(images javascripts stylesheets resources).each { |sd|
+      path = File.join(@htdocs, sd)
+      FileUtils.mkdir_p(path)
+
+      src = File.join(@templates, sd)
+      FileUtils.cp_r(src, @htdocs, { :remove_destination => true })
+    }
+  end
+
+  def find_posts
+    posts = {}
     Find.find(@data) { |f|
       if File.file?(f) && f =~ /_([\d]{12,12}).txt$/i
         dirdate = $1
@@ -52,75 +110,28 @@ class SBG
         post[:body] = pf.read.gsub(/\n\n/, "\n<br><br>\n")
 
         Dir.mkdir(postdir) unless File.exists?(postdir)
-        make_html("#{@templates}/blogpost.erb", post, "#{postdir}/index.html")
+        make_html("#{@templates}/blogpost.erb", {:post => post}, "#{postdir}/index.html")
 
-        content_info[dirdate] = post
+        posts[dirdate] = post
       end
     }
+    posts
+  end
 
-    return nil unless content_info.keys.length > 0
+  def generate
+    pagevars = {}
+    copy_resources
+    posts = find_posts
 
-    # Pagination
-    pc = content_info.length
-    puts "[*] #{pc} posts total"
+    return nil unless posts.length > 0
 
-    %w(blog).each { |template|
-      puts "[*] Generating pages for #{template}"
-      outdir = @htdocs
-      ppp = @ppp
+    paginate(:collection => posts, :template => 'blog', :ppp => 10,
+             :outdir => @htdocs, :pagevars => pagevars)
 
-      pages = pc / ppp
-      pages += 1 unless pc % ppp == 0
-
-      content_keys = content_info.keys.sort.reverse
-
-      (1..pages).each { |p|
-        puts "    - page #{p} of #{pages}"
-        page_content = {}
-        if content_keys.length >= ppp
-          ppp.times {
-            key = content_keys.shift
-            page_content[key] = content_info[key]
-          }
-        else
-          content_keys.length.times {
-            key = content_keys.shift
-            page_content[key] = content_info[key]
-          }
-        end
-
-        if p+1 > pages
-          next_page = nil
-        else
-          next_page = p+1
-        end
-
-        if p-1 < 1
-          prev_page = nil
-        else
-          prev_page = p-1
-        end
-
-        pagevars = {
-          :next_page => next_page,
-          :prev_page => prev_page,
-          :pages => pages,
-          :page => p,
-          :content_info => page_content
-        }
-
-        make_html("#{@templates}/#{template}.erb", pagevars, "#{outdir}/blog-#{p}.html")
-
-        FileUtils.cp("#{outdir}/blog-1.html", "#{outdir}/index.html")
-      }
-
-      pagevars = {
-        :content_info => content_info
-      }
-
-      make_html("#{@templates}/blog.atom.builder", pagevars, "#{outdir}/blog.atom")
-      make_html("#{@templates}/blog.rss.builder", pagevars, "#{outdir}/blog.rss")
-    }
+    puts "[*] Generating RSS/Atom"
+    pagevars[:content_info] = posts
+    make_html("#{@templates}/blog.atom.builder", pagevars, "#{@htdocs}/blog.atom")
+    make_html("#{@templates}/blog.rss.builder", pagevars, "#{@htdocs}/blog.rss")
   end
 end
 
