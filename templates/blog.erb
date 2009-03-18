@@ -6,9 +6,9 @@
     <title>Blog</title>
   </head>
   <body>
-    <%= render :partial => "header" %>
     <div id="wrapper">
-<!-- --------------------------------- Pagenav Start ------------------------------------- -->
+    <%= render :partial => "header" %>
+<!-- ================================= Pagenav Start ===================================== -->
       <div class="pagenav">
         <% if @prev_page %>
           <a href="/updates-<%= @prev_page %>.html">Previous</a>
@@ -28,20 +28,22 @@
           Next
         <% end %>
       </div>
-<!-- --------------------------------- Pagenav End ------------------------------------- -->
-      <%= render :partial => "sidebar_left" %>
-<!-- --------------------------------- Posts Start ------------------------------------- -->
-      <div class='entries'>
-        <% @content_info.keys.sort.reverse.each { |k| %>
-          <% @dir = @content_info[k][:dir] %>
-          <% @title = @content_info[k][:title] %>
-          <% @body = @content_info[k][:body] %>
-          <%= render :partial => "blogpost" %>
-        <% } %>
+<!-- ================================= Pagenav End ===================================== -->
+      <div class='content'>
+        <%= render :partial => "sidebar_left" %>
+<!-- ================================= Posts Start ===================================== -->
+        <div class='entries'>
+          <% @content_info.keys.sort.reverse.each { |k| %>
+            <% @dir = @content_info[k][:dir] %>
+            <% @title = @content_info[k][:title] %>
+            <% @body = @content_info[k][:body] %>
+            <%= render :partial => "blogpost" %>
+          <% } %>
+        </div>
+<!-- ================================== Posts End ====================================== -->
+        <%= render :partial => "sidebar_right" %>
       </div>
-<!-- ---------------------------------- Posts End -------------------------------------- -->
-      <%= render :partial => "sidebar_right_tweets" %>
+        <%= render :partial => "footer" %>
     </div>
-    <%= render :partial => "footer" %>
   </body>
 </html>
