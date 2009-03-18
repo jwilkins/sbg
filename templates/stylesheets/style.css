@@ -20,32 +20,47 @@ body{
 }
 div.pagenav {
   text-align: right;
+  margin-bottom: 10px;*/
 }
 div.entries {
+  margin-left: auto;
+  margin-right: auto;
   float: left;
-  width: 600px;
+  width: 540px;
+  margin-bottom: 10px;*/
 }
 div.sidebar_left {
+  font-size: 11px;
   float: left;
-  width: 100px;
+  width: 175px;
 }
 div.sidebar_right {
+  font-size: 11px;
   float: right;
-  width: 100px;
+  width: 175px;
 }
 div.header {
-  width: 600px;
+  width: 550px;
   margin-left: auto;
   margin-right: auto;
+  vertical-align: top;
 }
 div.footer{
-  width: 600px;
+  width: 550px;
+  margin-top: 10px;
   margin-left: auto;
   margin-right: auto;
+  vertical-align: bottom;
   font-size: 9px;
 }
+blockquote {
+  width: 10em;
+  margin: 0;
+  font-size:95%;
+  font-style:italic;
+}
 #wrapper {
-  width: 800px;
+  width: 900px;
   height: 100%;
   margin-left: auto;
   margin-right: auto;
